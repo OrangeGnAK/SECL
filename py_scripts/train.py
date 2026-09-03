@@ -5,47 +5,55 @@ import numpy as np
 import time
 import torch.distributed as dist
 from torchmetrics.classification import JaccardIndex 
+import yaml
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
+
 
 from model import contrastive_mit_b0
 from losses import FastSupCon
 from datasets import Sen1Floods11_DS
 from transforms import Sen1Floods11_transform
 from utils import setup_reproducibility, ddp_init, load_model, init_dataloaders, train_loop, validation_loop
+from factories import model_factory, dataset_factory
 
 def main():
 
     # TODO: Add YAML configuration
     # ------------------------------------------------------------------------
-    RANDOM_SEED = 42
-    BATCH_SIZE = 6
-    LEARNING_RATE = 5e-5
-    LAMBDA = 0.5
-    START_EPOCH = 1
-    TOTAL_EPOCHS = 60
+
+    with open('/kaggle/working/train_config.yaml', 'r') as file:
+        config_file = file.read()
+        
+    config = yaml.load(config_file, Loader=Loader)
+
     
-
-    model_load_path = '/kaggle/input/models/orangeggnt/bilk-epochs/pytorch/default/3/bilk_2GPU_model_epoch_2th'
-    model_best_path = '/kaggle/working/bilk_fewshot_random_best.pth'
-    model_last_path = '/kaggle/working/bilk_fewshot_random_last.pth'
+    RANDOM_SEED = config['hyperparams']['seed']
+    BATCH_SIZE = config['hyperparams']['batch_size']
+    LEARNING_RATE = config['hyperparams']['learning_rate']
+    LAMBDA = config['hyperparams']['LAMBDA']
+    START_EPOCH = 1
+    TOTAL_EPOCHS = config['hyperparams']['epochs']
+    
+    NUM_CLASSES = config['model']['num_classes']
+    model_load_path = config['model']['load_path']
+    model_best_path = config['model']['best_path']
+    model_last_path = config['model']['last_path']
     log_file_path = '/kaggle/working/fine_tune_fewshot_random_log.txt'
-
-    # TODO: calculate mean & std for each dataset. Those are BEN-14K mean & std
-    mean = np.array([627.1802, 676.7937, 428.5101, 1091.0465,  -17.2513,  -11.1336])
-    std =  np.array([419.1856, 272.5272, 229.5443, 385.9456,   3.7207,   3.5236])
-
+    
     # ------------------------------------------------------------------------
     
     setup_reproducibility(RANDOM_SEED)
 
     local_rank, world_size, device = ddp_init()
     is_main = (local_rank == 0)
-
     
 # -----------------------------------------------------------------------------------
     #                 __________MODEL INIT__________
     
-    model = contrastive_mit_b0(in_channels=6, projection_dim=128).to(device)
-
+    model = model_factory(config['model']).to(device)
     
     #TODO: Change model loading logic?
     load_model(model, model_load_path, model_best_path, model_last_path, local_rank)
@@ -57,7 +65,6 @@ def main():
         output_device=local_rank,
         find_unused_parameters=True)
 # -----------------------------------------------------------------------------------
-    
 
 # -----------------------------------------------------------------------------------
     # Init criterions and optimizer 
@@ -69,21 +76,16 @@ def main():
 )
     scaler = torch.amp.GradScaler()
 
-    criterion_ce = torch.nn.CrossEntropyLoss(ignore_index=-1).to(device)
-    criterion_fastsupcon = FastSupCon(ignore_index=-1, num_classes=2).to(device)
-
+    ignore_index = config['criterion']['ignore_index']
+    
+    criterion_ce = torch.nn.CrossEntropyLoss(ignore_index=ignore_index).to(device)
+    criterion_fastsupcon = FastSupCon(ignore_index=ignore_index, num_classes=NUM_CLASSES).to(device)
 
 # -----------------------------------------------------------------------------------
 #                         DATASET SPLIT
 # -----------------------------------------------------------------------------------
-    transform = Sen1Floods11_transform(mean, std)
-    
-    ds = Sen1Floods11_DS(
-        '/kaggle/input/datasets/robertomarinoformica/sen1floods11-dataset/HandLabeled/S1Hand',
-        '/kaggle/input/datasets/robertomarinoformica/sen1floods11-dataset/HandLabeled/S2Hand',
-        '/kaggle/input/datasets/robertomarinoformica/sen1floods11-dataset/HandLabeled/LabelHand',
-        transform=transform
-    )
+
+    ds = dataset_factory(config['dataset'])
 
     train_dl, val_dl, train_sampler, val_sampler = init_dataloaders(ds, RANDOM_SEED, BATCH_SIZE, local_rank, world_size)
 # -----------------------------------------------------------------------------------
