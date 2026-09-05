@@ -144,3 +144,37 @@ class contrastive_mit_b5(torch.nn.Module):
         
         
         return (z_flat, logits)
+
+
+class contrastive_Unet(torch.nn.Module):
+    def __init__(self, in_channels=6, projection_dim=128, num_classes=2):
+
+        super().__init__()
+        
+        full_unet = smp.Unet(
+            encoder_name="resnet34",
+            encoder_weights=None,
+            in_channels=in_channels, classes=num_classes)
+
+        self.encoder = full_unet.encoder
+        self.decoder = full_unet.decoder
+        
+        self.projection_head = torch.nn.Conv2d(16, projection_dim, kernel_size=1)
+        self.segmentation_head = torch.nn.Conv2d(16, num_classes, kernel_size=1)
+
+
+    def forward(self, x):
+
+        features = self.encoder(x)
+        features = self.decoder(features)
+
+        print(features.shape)
+
+        z_spatial = self.projection_head(features)
+        z_flat = z_spatial.flatten(2).transpose(1, 2)
+
+        logits = self.segmentation_head(features)
+
+
+        return (z_flat, logits)
+    

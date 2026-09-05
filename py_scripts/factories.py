@@ -9,17 +9,24 @@ def model_factory(model_params):
     model_name = model_params['name']
     in_channels = model_params['in_channels']
     proj_dim = model_params['proj_dim']
+    num_classes = model_params['num_classes']
     
     if model_name == 'mit_b0':
-        model = contrastive_mit_b0(in_channels=in_channels, projection_dim=proj_dim)
+        model = contrastive_mit_b0(
+            in_channels=in_channels, projection_dim=proj_dim, num_classes=num_classes)
         return model
     
     elif model_name == 'mit_b3':
-        print("mit_b3 created")
+        model = contrastive_mit_b5(
+            in_channels=in_channels, projection_dim=proj_dim, num_classes=num_classes)
+        return model
 
     elif model_name == 'unet_resnet34':
-        print("unet_resnet34 created")
-
+        model = contrastive_Unet(
+            in_channels=in_channels, projection_dim=proj_dim, num_classes=num_classes
+        )
+        return model
+    
     elif model_name == 'deeplab_v3plus':
         print("deeplab_v3plus created")
         
