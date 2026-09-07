@@ -22,13 +22,16 @@ def model_factory(model_params):
         return model
 
     elif model_name == 'unet_resnet34':
-        model = contrastive_Unet(
+        model = contrastive_Unet_EfficientNet(
             in_channels=in_channels, projection_dim=proj_dim, num_classes=num_classes
         )
         return model
     
-    elif model_name == 'deeplab_v3plus':
-        print("deeplab_v3plus created")
+    elif model_name == 'unet_efficientnet_b7':
+        model = contrastive_Unet_(
+            in_channels=in_channels, projection_dim=proj_dim, num_classes=num_classes
+        )
+        return model
         
     else:
         print(f"Model with the name {model_name} has not implemented.")
