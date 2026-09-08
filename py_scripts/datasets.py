@@ -42,3 +42,36 @@ class Sen1Floods11_DS(torch.utils.data.Dataset):
             return self.transform(full_img, label_data)
             
         return torch.from_numpy(full_img), torch.from_numpy(label_data)
+
+
+
+class Cityscape_DS(torch.utils.data.Dataset):
+    def __init__(self, root_dir, mode='train', transform=None):
+        super().__init__()
+        
+        img_dir = os.path.join(root_dir, 'Cityscape Dataset', 'leftImg8bit')
+        lbl_dir = os.path.join(root_dir, 'Fine Annotations', 'gtFine')
+        
+        names = self.get_names(os.path.join(img_dir, mode))
+        
+        self.names = sorted(names)
+        self.img_suffix = "_leftImg8bit.png"
+        self.lbl_suffix = "_gtFine_labelIds.png"
+        self.img_dir = img_dir
+        self.lbl_dir = lbl_dir
+        self.transform = transform
+
+    def get_names(self, img_dir):
+        cities = os.listdir(img_dir)
+        names = []
+        for city in cities:
+            names += [s.removesuffix('_leftImg8bit.png') for s in os.listdir(os.path.join(img_dir, city))]
+        return names
+        
+    
+    def __len__(self):
+        return len(self.names)
+
+    def __getitem__(self, idx):
+
+        name = self.names[idx]
