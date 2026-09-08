@@ -1,6 +1,7 @@
 import torch
 import os
 import rasterio
+import cv2 as cv
 import numpy as np
 import albumentations as A
 
@@ -44,15 +45,14 @@ class Sen1Floods11_DS(torch.utils.data.Dataset):
         return torch.from_numpy(full_img), torch.from_numpy(label_data)
 
 
-
-class Cityscape_DS(torch.utils.data.Dataset):
+class Cityscapes_DS(torch.utils.data.Dataset):
     def __init__(self, root_dir, mode='train', transform=None):
         super().__init__()
         
-        img_dir = os.path.join(root_dir, 'Cityscape Dataset', 'leftImg8bit')
-        lbl_dir = os.path.join(root_dir, 'Fine Annotations', 'gtFine')
+        img_dir = os.path.join(root_dir, 'Cityscape Dataset', 'leftImg8bit', mode)
+        lbl_dir = os.path.join(root_dir, 'Fine Annotations', 'gtFine', mode)
         
-        names = self.get_names(os.path.join(img_dir, mode))
+        names = self.get_names(img_dir)
         
         self.names = sorted(names)
         self.img_suffix = "_leftImg8bit.png"
@@ -75,3 +75,18 @@ class Cityscape_DS(torch.utils.data.Dataset):
     def __getitem__(self, idx):
 
         name = self.names[idx]
+        cityname = name.split('_')[0]
+        
+        img_path = os.path.join(self.img_dir, cityname, name + self.img_suffix)
+        lbl_path = os.path.join(self.lbl_dir, cityname, name + self.lbl_suffix)
+
+        img = cv.cvtColor(cv.imread(img_path), cv.COLOR_BGR2RGB)
+        lbl = cv.imread(lbl_path, cv.IMREAD_GRAYSCALE)
+
+        if self.transform:
+            return self.transform(img, lbl)
+        else:
+            img = torch.from_numpy(img).permute(2,0,1).to(torch.float32)
+            lbl = torch.from_numpy(lbl).to(torch.long)
+            
+        return img, lbl
