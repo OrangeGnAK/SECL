@@ -44,7 +44,7 @@ class Sen1Floods11_DS(torch.utils.data.Dataset):
             
         return torch.from_numpy(full_img), torch.from_numpy(label_data)
 
-
+# TODO: i really need to think what to do with the loss to deal with disbalance of the classes on Cityscapes...
 class Cityscapes_DS(torch.utils.data.Dataset):
     def __init__(self, root_dir, mode='train', transform=None):
         super().__init__()
