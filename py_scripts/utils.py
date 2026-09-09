@@ -4,6 +4,49 @@ import torch.distributed as dist
 import os
 import random
 import time
+from tqdm import tqdm
+
+def mean_std_calc(dataset, batch_size=16, num_workers=4):
+
+    device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'
+    
+    loader = torch.utils.data.DataLoader(
+        dataset, 
+        batch_size=batch_size, 
+        shuffle=False, 
+        num_workers=num_workers,
+        pin_memory=True
+    )
+    
+    first_batch = next(iter(loader))
+    num_channels = first_batch.shape 
+
+    channels_sum = torch.zeros(num_channels, dtype=torch.float64, device=device)
+    channels_sq_sum = torch.zeros(num_channels, dtype=torch.float64, device=device)
+    total_pixels = 0.0
+
+    for batch in tqdm(loader):
+        images = batch.to(torch.float64).to(device)
+        
+        # [B, C, H, W] -> [C, B * H * W]
+        images = images.transpose(0, 1).flatten(1)
+        
+        channels_sum += images.sum(dim=1)
+        channels_sq_sum += (images ** 2).sum(dim=1)
+        total_pixels += images.shape
+
+    mean = channels_sum / total_pixels
+    var = (channels_sq_sum / total_pixels) - (mean ** 2)
+    var = torch.clamp(var, min=0.0) 
+    std = torch.sqrt(var)
+
+    mean_list = [round(x, 4) for x in mean.tolist()]
+    std_list = [round(x, 4) for x in std.tolist()]
+
+    print(f"Mean: {mean_list}")
+    print(f"Std:  {std_list}")
+    
+    return mean_list, std_list
 
 
 def setup_reproducibility(seed=42):
