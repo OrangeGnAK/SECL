@@ -38,15 +38,15 @@ def model_factory(model_params):
 
 
 def dataset_factory(dataset_params):
-     # ["Sen1Floods11", "Cityscapes", "Landsat8_Cloud", "Pascal_VOC2012"]
+     # ["Sen1Floods11", "Cityscapes"]
     
     dataset_name = dataset_params['name']
     
     if dataset_name == 'Sen1Floods11':
 
-        # TODO: calculate mean & std for each dataset. Those are BEN-14K mean & std
-        mean = np.array([627.1802, 676.7937, 428.5101, 1091.0465,  -17.2513,  -11.1336])
-        std =  np.array([419.1856, 272.5272, 229.5443, 385.9456,   3.7207,   3.5236])
+        # SenFloods mean & std!!!
+        mean = np.array([1195.1572, 1344.4296, 1379.89, 2578.4109, -10.4345, -17.308])
+        std =  np.array([860.6037, 731.6119, 734.5892, 1029.2466, 4.1806, 4.8804])
         
         transform = Sen1Floods11_transform(mean, std)
         dataset = Sen1Floods11_DS(
@@ -59,7 +59,21 @@ def dataset_factory(dataset_params):
         return dataset
     
     elif dataset_name == 'Cityscapes':
-        print("Cityscapes created")
+
+        mean = np.array([73.1584, 82.9089, 72.3924])
+        std =  np.array([47.6758, 48.4942, 47.7365])
+
+        # TODO: change splitting logic for Cityscape. I can split it here via constructor
+        # and then in utils.py divide spliting and init logic in two separate functions
+        # so i can call split only for the SenFloods
+        transform = None
+        dataset = Cityscapes_DS(
+            '/kaggle/input/datasets/electraawais/cityscape-dataset',
+            mode='train',
+            transform=transform)
+
+        return dataset
+    
 
     elif dataset_name == 'Landsat8_Cloud':
         print("Landsat8_Cloud created")
