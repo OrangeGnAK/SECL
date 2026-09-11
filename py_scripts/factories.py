@@ -66,7 +66,7 @@ def dataset_factory(dataset_params):
         # TODO: change splitting logic for Cityscape. I can split it here via constructor
         # and then in utils.py divide spliting and init logic in two separate functions
         # so i can call split only for the SenFloods
-        transform = None
+        transform = Cityscape_transform(mean, std)
         dataset = Cityscapes_DS(
             '/kaggle/input/datasets/electraawais/cityscape-dataset',
             mode='train',
