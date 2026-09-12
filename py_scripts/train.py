@@ -21,7 +21,6 @@ from factories import model_factory, dataset_factory
 
 def main():
 
-    # TODO: Add YAML configuration
     # ------------------------------------------------------------------------
 
     with open('/kaggle/working/train_config.yaml', 'r') as file:

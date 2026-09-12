@@ -16,7 +16,7 @@ def model_factory(model_params):
             in_channels=in_channels, projection_dim=proj_dim, num_classes=num_classes)
         return model
     
-    elif model_name == 'mit_b3':
+    elif model_name == 'mit_b5':
         model = contrastive_mit_b5(
             in_channels=in_channels, projection_dim=proj_dim, num_classes=num_classes)
         return model

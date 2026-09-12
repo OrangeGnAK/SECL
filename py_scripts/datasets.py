@@ -1,7 +1,6 @@
 import torch
 import os
 import rasterio
-import cv2 as cv
 import numpy as np
 import albumentations as A
 
@@ -41,8 +40,13 @@ class Sen1Floods11_DS(torch.utils.data.Dataset):
 
         if self.transform:
             return self.transform(full_img, label_data)
+        else:
+            # print(full_img.shape)
+            full_img = torch.from_numpy(full_img).permute(2,0,1).to(torch.float32)
+            # print(full_img.shape)
+            label_data = torch.from_numpy(label_data).to(torch.long)
             
-        return torch.from_numpy(full_img), torch.from_numpy(label_data)
+        return full_img, label_data
 
 # TODO: i really need to think what to do with the loss to deal with disbalance of the classes on Cityscapes...
 class Cityscapes_DS(torch.utils.data.Dataset):

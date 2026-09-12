@@ -28,7 +28,7 @@ class Cityscape_transform:
             A.RandomCrop(height=512,width=512),
             A.HorizontalFlip(p=0.5),
             A.RandomBrightnessContrast(p=0.2),
-            A.HueSaturationValue(p=0.2)
+            A.HueSaturationValue(p=0.2),
             A.Normalize(mean=mean, std=std, max_pixel_value=1.0),
             A.ToTensorV2()
         ])

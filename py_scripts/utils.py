@@ -145,7 +145,7 @@ def train_loop(model, train_loader, device, optimizer, criterion_ce,
             # Branch A valid variant
             with torch.amp.autocast(device_type='cuda', dtype=torch.float16):
                 contrast_features, segmentation_features = model(images)
-                loss_ce = criterion_ce(segmentation_features, masks)
+                loss_ce = criterion_ce(segmentation_features, masks.to(torch.int64))
                 loss_fastsupcon = criterion_fastsupcon(contrast_features, masks)
                 loss = loss_ce + LAMBDA * loss_fastsupcon
 
@@ -176,7 +176,7 @@ def train_loop(model, train_loader, device, optimizer, criterion_ce,
             # Branch B: Fake step for proper DDP work
             with torch.amp.autocast(device_type='cuda', dtype=torch.float16):
                 contrast_features, segmentation_features = model(images)
-                loss = criterion_ce(segmentation_features, masks) * 0.0
+                loss = criterion_ce(segmentation_features, masks.to(torch.int64)) * 0.0
                 
             scaler.scale(loss).backward()
             # unscaling
@@ -204,6 +204,12 @@ def train_loop(model, train_loader, device, optimizer, criterion_ce,
 # ---------------------------------------------------------------------------------------------------
 
     # TODO: All_reduce
+    losses = torch.tensor(
+        [running_loss, running_loss_ce, running_loss_fastsupcon, float(total_batches)],
+        device=device
+    )
+
+    dist.all_reduce(losses, op=dist.ReduceOp.SUM)
     
     final_avg_loss = running_loss / total_batches if total_batches > 0 else 0.0
     final_avg_ce = running_loss_ce / total_batches if total_batches > 0 else 0.0
@@ -232,7 +238,7 @@ def validation_loop(model, val_dataloader, device, val_iou_metric,
                 
             with torch.amp.autocast(device_type='cuda', dtype=torch.float16):
                 contrast_features, segmentation_features = model(images)
-                loss_ce = criterion_ce(segmentation_features, masks)
+                loss_ce = criterion_ce(segmentation_features, masks.to(torch.int64))
                 loss_fastsupcon = criterion_fastsupcon(contrast_features, masks)
                 loss = loss_ce + LAMBDA * loss_fastsupcon
 
@@ -253,11 +259,11 @@ def validation_loop(model, val_dataloader, device, val_iou_metric,
         device=device
     )
 
-    # dist.all_reduce(losses, op=dist.ReduceOp.SUM)
+    dist.all_reduce(losses, op=dist.ReduceOp.SUM)
 
-    loss = losses[0].item() / losses[3].item()
-    loss_ce = losses[1].item() / losses[3].item()
-    loss_fastsupcon = losses[2].item() / losses[3].item()
+    loss = losses[0].item() / losses[3].item() if losses[3].item() > 0 else 0.0
+    loss_ce = losses[1].item() / losses[3].item() if losses[3].item() > 0 else 0.0
+    loss_fastsupcon = losses[2].item() / losses[3].item() if losses[3].item() > 0 else 0.0
     
     val_ious = val_iou_metric.compute()
     val_land_iou = val_ious[0].item()
