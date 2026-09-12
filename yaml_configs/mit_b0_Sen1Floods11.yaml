@@ -1,0 +1,24 @@
+
+model:
+    name: "mit_b0" # ["mit_b0", "mit_b5", "unet_resnet34", "unet_efficientnet_b7"]
+    in_channels: 6
+    proj_dim: 128
+    num_classes: 2
+    load_path: ""
+    best_path: "/kaggle/working/mit_b0_Sen1Floods11_best.pth"
+    last_path: "/kaggle/working/mit_b0_Sen1Floods11_last.pth"
+
+dataset:
+    name: "Sen1Floods11" # ["Sen1Floods11", "Cityscapes"]
+    num_classes: 2
+
+criterion:
+    ignore_index: -1
+
+hyperparams:
+    seed : 42
+    batch_size : 6
+    learning_rate : 0.00005 
+    LAMBDA : 0.5 # [0.1, 0.5, 1, 2, 5]
+    epochs : 60
+
