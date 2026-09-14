@@ -1,4 +1,5 @@
 import os
+import argparse 
 import random
 import torch
 import numpy as np
@@ -23,7 +24,12 @@ def main():
 
     # ------------------------------------------------------------------------
 
-    with open('/kaggle/working/train_config.yaml', 'r') as file:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--yaml_config", type=str, help="path to the yaml config file")
+    
+    args = parser.parse_args()
+    
+    with open(args.yaml_config, 'r') as file:
         config_file = file.read()
         
     config = yaml.load(config_file, Loader=Loader)
