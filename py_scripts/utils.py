@@ -6,6 +6,45 @@ import random
 import time
 from tqdm import tqdm
 
+
+def get_class_weights(dataset, num_classes, batch_size=16, num_workers=2):
+
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # here we need o initialize dataloader
+    dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True, drop_last=False
+    )
+    b, h, w = dataset[0][1].shape
+    px_per_image = h * w
+    
+    frequencies = torch.zeros(num_classes, dtype=torch.float, device=device)
+    # how many images contains class
+    appearence_count = torch.zeros(num_classes, dtype=torch.float, device=device)
+    
+    # then we will place for loop
+    for _, mask in dataloader:
+        
+        print(mask.shape)
+        # result is a list with 16 tensors with number of pixels that belongs to a class (index)
+        classes_freq = [
+            torch.bincount(mask[i,:,:], minlength=num_classes) / px_per_image for i in range(batch_size)]
+         
+        
+        for t in classes_count:
+            frequencies += classes_freq
+            appearence_count += classes_freq.gt(0).int()
+            
+    frequencies /= len(dataset)
+        
+        break
+    
+    # what algo should we choose to calculae weights?
+
+    # we need to return weiths - array with the shape K - number of classes
+
+
+
+
 def mean_std_calc(dataset, batch_size=16, num_workers=4):
 
     device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'

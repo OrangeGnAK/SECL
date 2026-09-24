@@ -3,6 +3,7 @@ import os
 import rasterio
 import numpy as np
 import albumentations as A
+import cv2 as cv
 
 class Sen1Floods11_DS(torch.utils.data.Dataset):
     def __init__(self, s1_dir, s2_dir, label_dir, transform=None):
@@ -57,6 +58,11 @@ class Cityscapes_DS(torch.utils.data.Dataset):
         lbl_dir = os.path.join(root_dir, 'Fine Annotations', 'gtFine', mode)
         
         names = self.get_names(img_dir)
+
+        self.id_to_trainid = np.array([
+            -1, -1, -1, -1, -1, -1, -1,  0,  1, -1, -1,  2,  3,  4, -1, -1, -1,
+             5, -1,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, -1, -1, 16, 17, 18
+        ], dtype=np.int64)
         
         self.names = sorted(names)
         self.img_suffix = "_leftImg8bit.png"
@@ -86,6 +92,9 @@ class Cityscapes_DS(torch.utils.data.Dataset):
 
         img = cv.cvtColor(cv.imread(img_path), cv.COLOR_BGR2RGB)
         lbl = cv.imread(lbl_path, cv.IMREAD_GRAYSCALE)
+
+        lbl = np.where(lbl < len(self.id_to_trainid), lbl, 0)
+        lbl = self.id_to_trainid[lbl]
 
         if self.transform:
             return self.transform(img, lbl)
