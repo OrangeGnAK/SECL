@@ -1,3 +1,4 @@
+%%writefile utils.py
 import numpy as np
 import torch
 import torch.distributed as dist
@@ -12,7 +13,7 @@ def get_class_weights(dataset, num_classes, batch_size=16, num_workers=2):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     # here we need o initialize dataloader
     dataloader = torch.utils.data.DataLoader(
-        dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True, drop_last=False
+        dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True, drop_last=True
     )
     b, h, w = dataset[0][1].shape
     px_per_image = h * w
@@ -25,25 +26,24 @@ def get_class_weights(dataset, num_classes, batch_size=16, num_workers=2):
     for _, mask in dataloader:
         
         print(mask.shape)
+        # mask.to(device)
         # result is a list with 16 tensors with number of pixels that belongs to a class (index)
+        mask[mask == -1] = 255
         classes_freq = [
-            torch.bincount(mask[i,:,:], minlength=num_classes) / px_per_image for i in range(batch_size)]
+            torch.bincount(mask[i,:,:], minlength=num_classes)[:num_classes] / px_per_image for i in range(batch_size)]
          
         
-        for t in classes_count:
-            frequencies += classes_freq
-            appearence_count += classes_freq.gt(0).int()
-            
-    frequencies /= len(dataset)
+        for t in classes_freq:
+            print(t)
+            frequencies += t
+            appearence_count += t.gt(0).int()
         
-        break
-    
-    # what algo should we choose to calculae weights?
+    frequencies /= appearence_count
+    mean_freq = torch.mean(frequencies)
+    frequencies /= mean_freq
 
-    # we need to return weiths - array with the shape K - number of classes
-
-
-
+    return frequencies
+ 
 
 def mean_std_calc(dataset, batch_size=16, num_workers=4):
 
