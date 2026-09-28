@@ -1,3 +1,4 @@
+%%writefile factories.py
 from model import *
 from datasets import *
 from transforms import *
@@ -37,7 +38,7 @@ def model_factory(model_params):
         print(f"Model with the name {model_name} has not implemented.")
 
 
-def dataset_factory(dataset_params):
+def dataset_factory(dataset_params, RANDOM_SEED):
      # ["Sen1Floods11", "Cityscapes"]
     
     dataset_name = dataset_params['name']
@@ -55,8 +56,18 @@ def dataset_factory(dataset_params):
             '/kaggle/input/datasets/robertomarinoformica/sen1floods11-dataset/HandLabeled/LabelHand',
             transform=transform
         )
+
+        # Dataset split
+        train_size = 314
+        val_size = 120
+        test_size = 12
         
-        return dataset
+        rn_gen = torch.Generator().manual_seed(RANDOM_SEED)
+        
+        train_ds, val_ds, test_ds = torch.utils.data.random_split(
+            ds, [train_size, val_size, test_size], generator=rn_gen)
+        
+        return train_ds, val_ds, test_ds
     
     elif dataset_name == 'Cityscapes':
 
@@ -67,19 +78,21 @@ def dataset_factory(dataset_params):
         # and then in utils.py divide spliting and init logic in two separate functions
         # so i can call split only for the SenFloods
         transform = Cityscape_transform(mean, std)
-        dataset = Cityscapes_DS(
+        train_ds = Cityscapes_DS(
             '/kaggle/input/datasets/electraawais/cityscape-dataset',
             mode='train',
             transform=transform)
 
-        return dataset
-    
+        val_ds = Cityscapes_DS(
+            '/kaggle/input/datasets/electraawais/cityscape-dataset',
+            mode='train',
+            transform=transform)
 
-    elif dataset_name == 'Landsat8_Cloud':
-        print("Landsat8_Cloud created")
+        test_ds = Cityscapes_DS(
+            '/kaggle/input/datasets/electraawais/cityscape-dataset',
+            mode='train',
+            transform=transform)
 
-    elif dataset_name == 'Pascal_VOC2012':
-        print("Pascal_VOC2012 created")
-        
+        return train_ds, val_ds, test_ds
     else:
         print(f"Dataset with the name {dataset_name} has not implemented.")

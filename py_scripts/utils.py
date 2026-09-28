@@ -134,32 +134,15 @@ def load_model(model, model_load_path, model_best_path, model_last_path, local_r
 
 
 def init_dataloaders(ds, RANDOM_SEED, BATCH_SIZE, local_rank, world_size):
-    
-    # Dataset split
-    train_size = 314
-    val_size = 120
-    test_size = 12
-    
-    rn_gen = torch.Generator().manual_seed(RANDOM_SEED)
-    
-    train_ds, val_ds, test_ds = torch.utils.data.random_split(
-        ds, [train_size, val_size, test_size], generator=rn_gen)
 
-    train_sampler = torch.utils.data.distributed.DistributedSampler(
-        train_ds, num_replicas=world_size, rank=local_rank, shuffle=True, seed=RANDOM_SEED
+    sampler = torch.utils.data.distributed.DistributedSampler(
+        ds, num_replicas=world_size, rank=local_rank, shuffle=True, seed=RANDOM_SEED
     )
-    train_dataloader = torch.utils.data.DataLoader(
-        train_ds, batch_size=BATCH_SIZE, sampler=train_sampler, num_workers=2, pin_memory=True, drop_last=False
+    dataloader = torch.utils.data.DataLoader(
+        ds, batch_size=BATCH_SIZE, sampler=train_sampler, num_workers=2, pin_memory=True, drop_last=False
     )
 
-    val_sampler = torch.utils.data.distributed.DistributedSampler(
-        val_ds, num_replicas=world_size, rank=local_rank, shuffle=False, seed=RANDOM_SEED
-    )
-    val_dataloader = torch.utils.data.DataLoader(
-        val_ds, batch_size=BATCH_SIZE, sampler=val_sampler, num_workers=2, pin_memory=True, drop_last=False
-    )
-
-    return (train_dataloader, val_dataloader, train_sampler, val_sampler)
+    return dataloader
 
 
 def train_loop(model, train_loader, device, optimizer, criterion_ce,
