@@ -1,4 +1,3 @@
-%%writefile utils.py
 import numpy as np
 import torch
 import torch.distributed as dist
@@ -224,14 +223,6 @@ def train_loop(model, train_loader, device, optimizer, criterion_ce,
             if total_batches % 5 == 0 or total_batches == len(train_loader):
                 print(f"Epoch {epoch} | Train Batch {total_batches}/{len(train_loader)} | Loss Value {loss.item()} | ETA: {eta_min:.1f}m")
 # ---------------------------------------------------------------------------------------------------
-
-    # TODO: All_reduce
-    losses = torch.tensor(
-        [running_loss, running_loss_ce, running_loss_fastsupcon, float(total_batches)],
-        device=device
-    )
-
-    dist.all_reduce(losses, op=dist.ReduceOp.SUM)
     
     final_avg_loss = running_loss / total_batches if total_batches > 0 else 0.0
     final_avg_ce = running_loss_ce / total_batches if total_batches > 0 else 0.0
@@ -254,6 +245,7 @@ def validation_loop(model, val_dataloader, device, val_iou_metric,
     with torch.inference_mode():
         for images, masks in val_dataloader:
             images, masks = images.to(device, non_blocking=True), masks.to(device, non_blocking=True)
+            # TODO: move this to SenFLoods Dataset class
             images = torch.nan_to_num(images, nan=0.0, posinf=0.0, neginf=0.0)
             if (masks == 0).sum() == 0 or (masks == 1).sum() == 0:
                 continue
@@ -283,19 +275,9 @@ def validation_loop(model, val_dataloader, device, val_iou_metric,
 
     dist.all_reduce(losses, op=dist.ReduceOp.SUM)
 
-    loss = losses[0].item() / losses[3].item() if losses[3].item() > 0 else 0.0
-    loss_ce = losses[1].item() / losses[3].item() if losses[3].item() > 0 else 0.0
-    loss_fastsupcon = losses[2].item() / losses[3].item() if losses[3].item() > 0 else 0.0
-    
-    val_ious = val_iou_metric.compute()
-    val_land_iou = val_ious[0].item()
-    val_water_iou = val_ious[1].item()
-    val_miou = val_ious.mean().item()
+    loss = running_loss / total_batches if total_batches > 0 else 0.0
+    loss_ce = running_loss_ce / total_batches if total_batches > 0 else 0.0
+    loss_fastsupcon = running_loss_fastsupcon / total_batches if total_batches > 0 else 0.0
 
-    if is_main:
-        print(f"\n[VAL EPOCH {epoch}] Finished!")
-        print(f"--> Global Loss: {loss:.4f} (CE: {loss_ce:.4f}, Contrast: {loss_fastsupcon:.4f})")
-        print(f"--> IoU Land (Суша): {val_land_iou:.4f} | IoU Water (Вода): {val_water_iou:.4f} | mIoU: {val_miou:.4f}\n")
-
-    return loss, val_miou, val_land_iou, val_water_iou
+    return loss
 

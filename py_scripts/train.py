@@ -46,7 +46,8 @@ def main():
     model_load_path = config['model']['load_path']
     model_best_path = config['model']['best_path']
     model_last_path = config['model']['last_path']
-    log_file_path = '/kaggle/working/fine_tune_fewshot_random_log.txt'
+    # LOGGING
+    log_path = config['log_path']
     
     # ------------------------------------------------------------------------
     
@@ -90,26 +91,39 @@ def main():
 #                         DATASET SPLIT
 # -----------------------------------------------------------------------------------
 
-    ds = dataset_factory(config['dataset'])
+    train_ds, val_ds, _ = dataset_factory(config['dataset'])
 
-    train_dl, val_dl, train_sampler, val_sampler = init_dataloaders(ds, RANDOM_SEED, BATCH_SIZE, local_rank, world_size)
+    train_dl, train_sampler = init_dataloaders(train_ds, RANDOM_SEED, BATCH_SIZE, local_rank, world_size)
+    val_dl, val_sampler = init_dataloaders(val_ds, RANDOM_SEED, BATCH_SIZE, local_rank, world_size)
 # -----------------------------------------------------------------------------------
 
     # Metrics
-    train_iou_metric = JaccardIndex(task="multiclass", num_classes=2, ignore_index=-1, average="none", sync_on_compute=True).to(device)
-    val_iou_metric = JaccardIndex(task="multiclass", num_classes=2, ignore_index=-1, average="none", sync_on_compute=True).to(device)
+    train_iou_metric = JaccardIndex(
+        task="multiclass", num_classes=NUM_CLASSES, ignore_index=ignore_index,
+        average="none", sync_on_compute=True, dist_sync_on_step=False).to(device)
+    val_iou_metric = JaccardIndex(
+        task="multiclass", num_classes=NUM_CLASSES, ignore_index=ignore_index,
+        average="none", sync_on_compute=True, dist_sync_on_step=False).to(device)
 
     best_val_miou = 0.0
     
-    # Log table head
-    if is_main:
-        with open(log_file_path, 'w') as f:
-            f.write("Epoch | Train_Loss | Train_mIoU | Val_Land_IoU | Val_Water_IoU | Val_mIoU\n")
+    # Setting up dictionary for logs
+    logs_dict = {
+        'train_loss' : [],
+        'train_ce_loss' : [],
+        'train_contrastive_loss' : [],
+        'train_iou' : [],
+        'train_miou' : [],
+        'val_loss' : [],
+        'val_iou' : [],
+        'val_miou' : []
+    }
 
     # TRAIN&VALIDATION LOOP
     for epoch in range(START_EPOCH, TOTAL_EPOCHS + 1):
         
         train_sampler.set_epoch(epoch - 1)
+        val_sampler.set_epoch(epoch - 1)
         
         train_iou_metric.reset()
         val_iou_metric.reset()
@@ -132,9 +146,12 @@ def main():
 # ---------------------------------------------------------------------------------------------------
         
         # --- STEP 2: VALIDATION ---
-        val_loss, val_miou, val_land_iou, val_water_iou = validation_loop(
+        val_loss = validation_loop(
             model, val_dl, device, val_iou_metric,
             criterion_ce, criterion_fastsupcon, LAMBDA, is_main, epoch)
+
+        val_ious = val_iou_metric.compute()
+        val_miou = val_ious.mean().item()
 
         scheduler.step()
         
@@ -142,13 +159,19 @@ def main():
         if is_main:
             print(f"\n=== RESULTS OF EPOCH {epoch} ===")
             print(f"Train Loss: {train_loss:.4f} | Train mIoU: {train_miou:.4f}")
-            print(f"Val Loss: {val_loss:.4f}")
-            print(f"Val Land IoU: {val_land_iou:.4f} | Val Water IoU: {val_water_iou:.4f} | Val MeanIoU: {val_miou:.4f}")
+            print(f"Val Loss: {val_loss:.4f} | Val mIoU: {val_miou:.4f}")
             print(f"Epoch time: {(time.time() - start_epoch_time)/60:.1f} min\n")
 
-            # Writing to the text log
-            with open(log_file_path, 'a') as f:
-                f.write(f"{epoch} | {train_loss:.4f} | {train_miou:.4f} | {val_land_iou:.4f} | {val_water_iou:.4f} | {val_miou:.4f}\n")
+            # Writing to the log
+            logs_dict['train_loss'].append(train_loss.item())
+            logs_dict['train_ce_loss'].append(train_loss_ce.item())
+            logs_dict['train_contrastive_loss'].append(train_loss_fastsupcon.item())
+            logs_dict['train_iou'].append(train_ious.cpu().numpy())
+            logs_dict['train_miou'].append(train_miou.item())
+            logs_dict['val_loss'].append(val_loss.item())
+            logs_dict['val_iou'].append(val_ious.cpu().numpy())
+            logs_dict['val_miou'].append(val_miou.item())
+    
 
             checkpoint = {
                 'model_state_dict': model.module.state_dict(), 
@@ -167,7 +190,17 @@ def main():
                 print(f"--> [SAVED] Best chekpoint on the epoch {epoch} with Val mIoU: {val_miou:.4f}!")
             print("=========================\n")
 
-        dist.barrier() 
+        dist.barrier()
+        
+    if is_main:
+        np.save(os.path.join(log_path, 'train_loss.npy'),np.array(logs_dict['train_loss']))
+        np.save(os.path.join(log_path, 'train_ce_loss.npy'),np.array(logs_dict['train_ce_loss']))
+        np.save(os.path.join(log_path, 'train_contrastive_loss.npy'),np.array(logs_dict['train_contrastive_loss']))
+        np.save(os.path.join(log_path, 'train_iou.npy'),np.array(logs_dict['train_iou']))
+        np.save(os.path.join(log_path, 'train_miou.npy'),np.array(logs_dict['train_miou']))
+        np.save(os.path.join(log_path, 'val_loss.npy'),np.array(logs_dict['val_loss']))
+        np.save(os.path.join(log_path, 'val_iou.npy'),np.array(logs_dict['val_iou']))
+        np.save(os.path.join(log_path, 'val_miou.npy'),np.array(logs_dict['val_miou']))
     
     dist.destroy_process_group()
 
