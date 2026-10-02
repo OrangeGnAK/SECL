@@ -14,7 +14,7 @@ def get_class_weights(dataset, num_classes, batch_size=16, num_workers=2):
     dataloader = torch.utils.data.DataLoader(
         dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True, drop_last=True
     )
-    b, h, w = dataset[0][1].shape
+    h, w = dataset[0][1].shape
     px_per_image = h * w
     
     frequencies = torch.zeros(num_classes, dtype=torch.float, device=device)
@@ -24,18 +24,20 @@ def get_class_weights(dataset, num_classes, batch_size=16, num_workers=2):
     # then we will place for loop
     for _, mask in dataloader:
         
-        print(mask.shape)
+        # print(mask.shape)
         # mask.to(device)
         # result is a list with 16 tensors with number of pixels that belongs to a class (index)
         mask[mask == -1] = 255
+        # print(mask.unique())
+        # return 0
         classes_freq = [
-            torch.bincount(mask[i,:,:], minlength=num_classes)[:num_classes] / px_per_image for i in range(batch_size)]
+            torch.bincount(torch.flatten(mask[i,:,:]), minlength=num_classes)[:num_classes] / px_per_image for i in range(batch_size)]
          
         
         for t in classes_freq:
-            print(t)
-            frequencies += t
-            appearence_count += t.gt(0).int()
+            # print(t)
+            frequencies += t.to(device)
+            appearence_count += t.gt(0).int().to(device)
         
     frequencies /= appearence_count
     mean_freq = torch.mean(frequencies)
@@ -138,10 +140,10 @@ def init_dataloaders(ds, RANDOM_SEED, BATCH_SIZE, local_rank, world_size):
         ds, num_replicas=world_size, rank=local_rank, shuffle=True, seed=RANDOM_SEED
     )
     dataloader = torch.utils.data.DataLoader(
-        ds, batch_size=BATCH_SIZE, sampler=train_sampler, num_workers=2, pin_memory=True, drop_last=False
+        ds, batch_size=BATCH_SIZE, sampler=sampler, num_workers=2, pin_memory=True, drop_last=False
     )
 
-    return dataloader
+    return dataloader, sampler
 
 
 def train_loop(model, train_loader, device, optimizer, criterion_ce,
@@ -156,7 +158,6 @@ def train_loop(model, train_loader, device, optimizer, criterion_ce,
     model.train()
     for images, masks in train_loader:
         images, masks = images.to(device, non_blocking=True), masks.to(device, non_blocking=True)
-        images = torch.nan_to_num(images, nan=0.0, posinf=0.0, neginf=0.0)
             
         optimizer.zero_grad()
         
@@ -245,8 +246,7 @@ def validation_loop(model, val_dataloader, device, val_iou_metric,
     with torch.inference_mode():
         for images, masks in val_dataloader:
             images, masks = images.to(device, non_blocking=True), masks.to(device, non_blocking=True)
-            # TODO: move this to SenFLoods Dataset class
-            images = torch.nan_to_num(images, nan=0.0, posinf=0.0, neginf=0.0)
+            
             if (masks == 0).sum() == 0 or (masks == 1).sum() == 0:
                 continue
                 

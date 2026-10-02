@@ -40,12 +40,14 @@ class Sen1Floods11_DS(torch.utils.data.Dataset):
             (1,2,0))
 
         if self.transform:
-            return self.transform(full_img, label_data)
+            full_img, label_data = self.transform(full_img, label_data)
         else:
             # print(full_img.shape)
             full_img = torch.from_numpy(full_img).permute(2,0,1).to(torch.float32)
             # print(full_img.shape)
             label_data = torch.from_numpy(label_data).to(torch.long)
+        
+        full_img = torch.nan_to_num(full_img, nan=0.0, posinf=0.0, neginf=0.0)
             
         return full_img, label_data
 

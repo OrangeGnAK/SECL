@@ -1,8 +1,29 @@
-%%writefile factories.py
 from model import *
 from datasets import *
 from transforms import *
 
+"""
+Cityscape
+tensor([6.1053, 1.0482, 3.7859, 0.3298, 0.3289, 0.2023, 0.0609, 0.0954, 2.6672,
+        0.3390, 0.7273, 0.2536, 0.0644, 1.2027, 0.3622, 0.4132, 0.7968, 0.0946,
+        0.1224], device='cuda:0')
+
+SenFloods
+tensor([1.7644, 0.2356], device='cuda:0')
+"""
+def weights_factory(ds_name, device):
+
+    if ds_name == "Cityscapes":
+        return torch.tensor(
+            [6.1053, 1.0482, 3.7859, 0.3298, 0.3289, 0.2023,
+             0.0609, 0.0954, 2.6672, 0.3390, 0.7273, 0.2536,
+             0.0644, 1.2027, 0.3622, 0.4132, 0.7968, 0.0946, 0.1224],
+            device=device, dtype=torch.float)
+        
+    elif ds_name == "Sen1Floods11":
+        return torch.tensor(
+            [1.7644, 0.2356],
+            device=device, dtype=torch.float)
 
 def model_factory(model_params):
     # ["mit_b0", "mit_b3", "unet_resnet34", "deeplab_v3plus"]
@@ -65,7 +86,7 @@ def dataset_factory(dataset_params, RANDOM_SEED):
         rn_gen = torch.Generator().manual_seed(RANDOM_SEED)
         
         train_ds, val_ds, test_ds = torch.utils.data.random_split(
-            ds, [train_size, val_size, test_size], generator=rn_gen)
+            dataset, [train_size, val_size, test_size], generator=rn_gen)
         
         return train_ds, val_ds, test_ds
     

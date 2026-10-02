@@ -18,7 +18,7 @@ from losses import FastSupCon
 from datasets import Sen1Floods11_DS
 from transforms import Sen1Floods11_transform
 from utils import setup_reproducibility, ddp_init, load_model, init_dataloaders, train_loop, validation_loop
-from factories import model_factory, dataset_factory
+from factories import model_factory, dataset_factory, weights_factory
 
 def main():
 
@@ -74,6 +74,9 @@ def main():
 
 # -----------------------------------------------------------------------------------
     # Init criterions and optimizer 
+
+    weights = weights_factory(config['dataset']['name'], device)
+    
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     optimizer, 
@@ -84,14 +87,15 @@ def main():
 
     ignore_index = config['criterion']['ignore_index']
     
-    criterion_ce = torch.nn.CrossEntropyLoss(ignore_index=ignore_index).to(device)
-    criterion_fastsupcon = FastSupCon(ignore_index=ignore_index, num_classes=NUM_CLASSES).to(device)
+    criterion_ce = torch.nn.CrossEntropyLoss(ignore_index=ignore_index, weight=weights).to(device)
+    criterion_fastsupcon = FastSupCon(
+        ignore_index=ignore_index, num_classes=NUM_CLASSES, weight=weights).to(device)
 
 # -----------------------------------------------------------------------------------
 #                         DATASET SPLIT
 # -----------------------------------------------------------------------------------
 
-    train_ds, val_ds, _ = dataset_factory(config['dataset'])
+    train_ds, val_ds, _ = dataset_factory(config['dataset'], RANDOM_SEED)
 
     train_dl, train_sampler = init_dataloaders(train_ds, RANDOM_SEED, BATCH_SIZE, local_rank, world_size)
     val_dl, val_sampler = init_dataloaders(val_ds, RANDOM_SEED, BATCH_SIZE, local_rank, world_size)
@@ -158,19 +162,20 @@ def main():
         # --- STEP 3: LOGS AND MODEL SAVING ---
         if is_main:
             print(f"\n=== RESULTS OF EPOCH {epoch} ===")
+            print(f"Train CE Loss: {train_loss_ce:.4f} | Train SECL: {train_loss_fastsupcon:.4f}")
             print(f"Train Loss: {train_loss:.4f} | Train mIoU: {train_miou:.4f}")
             print(f"Val Loss: {val_loss:.4f} | Val mIoU: {val_miou:.4f}")
             print(f"Epoch time: {(time.time() - start_epoch_time)/60:.1f} min\n")
 
             # Writing to the log
-            logs_dict['train_loss'].append(train_loss.item())
-            logs_dict['train_ce_loss'].append(train_loss_ce.item())
-            logs_dict['train_contrastive_loss'].append(train_loss_fastsupcon.item())
+            logs_dict['train_loss'].append(train_loss)
+            logs_dict['train_ce_loss'].append(train_loss_ce)
+            logs_dict['train_contrastive_loss'].append(train_loss_fastsupcon)
             logs_dict['train_iou'].append(train_ious.cpu().numpy())
-            logs_dict['train_miou'].append(train_miou.item())
-            logs_dict['val_loss'].append(val_loss.item())
+            logs_dict['train_miou'].append(train_miou)
+            logs_dict['val_loss'].append(val_loss)
             logs_dict['val_iou'].append(val_ious.cpu().numpy())
-            logs_dict['val_miou'].append(val_miou.item())
+            logs_dict['val_miou'].append(val_miou)
     
 
             checkpoint = {

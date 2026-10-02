@@ -1,11 +1,10 @@
-%%writefile losses.py
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 
 # stable with softmax
-class FastSupCon_v2(nn.Module):
+class FastSupCon_softmax(nn.Module):
     def __init__(self, temperature: float = 0.07, num_classes: int = 2, ignore_index=None):
         super().__init__()
         self.temperature = temperature
@@ -72,7 +71,7 @@ class FastSupCon_v2(nn.Module):
 
 
 # stable with margin
-class FastSupCon(nn.Module):
+class FastSupCon_margin(nn.Module):
     def __init__(self, temperature: float = 0.07, margin: float = 0.3, num_classes: int = 2, ignore_index=None):
         super().__init__()
         self.temperature = temperature
@@ -139,7 +138,7 @@ class FastSupCon(nn.Module):
 
 
 
-class weighted_FastSupCon(nn.Module):
+class FastSupCon(nn.Module):
     def __init__(self, temperature: float = 0.07, margin: float = 0.3, num_classes: int = 2, ignore_index=None, weight=None):
         super().__init__()
         self.temperature = temperature

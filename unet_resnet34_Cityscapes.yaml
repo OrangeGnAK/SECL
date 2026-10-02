@@ -1,7 +1,7 @@
 
 model:
     name: "unet_resnet34" # ["mit_b0", "mit_b5", "unet_resnet34", "unet_efficientnet_b7"]
-    in_channels: 6
+    in_channels: 3
     proj_dim: 128
     num_classes: 2
     load_path: ""
