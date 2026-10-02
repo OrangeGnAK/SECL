@@ -167,6 +167,7 @@ def train_loop(model, train_loader, device, optimizer, criterion_ce,
             # Branch A valid variant
             with torch.amp.autocast(device_type='cuda', dtype=torch.float16):
                 contrast_features, segmentation_features = model(images)
+                # print(f"\n\n\nlogits shape is {segmentation_features.shape}\n ground truth shape is {masks.shape}\n\n\n")
                 loss_ce = criterion_ce(segmentation_features, masks.to(torch.int64))
                 loss_fastsupcon = criterion_fastsupcon(contrast_features, masks)
                 loss = loss_ce + LAMBDA * loss_fastsupcon

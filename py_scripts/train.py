@@ -33,6 +33,7 @@ def main():
         config_file = file.read()
         
     config = yaml.load(config_file, Loader=Loader)
+    # print(f"/n/n/nconfig file is {config_file}/n/n/n")
 
     
     RANDOM_SEED = config['hyperparams']['seed']
@@ -43,6 +44,7 @@ def main():
     TOTAL_EPOCHS = config['hyperparams']['epochs']
     
     NUM_CLASSES = config['model']['num_classes']
+    print(f"/n/n/nnum classes is {NUM_CLASSES}/n/n/n")
     model_load_path = config['model']['load_path']
     model_best_path = config['model']['best_path']
     model_last_path = config['model']['last_path']
