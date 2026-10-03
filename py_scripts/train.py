@@ -200,6 +200,7 @@ def main():
         dist.barrier()
         
     if is_main:
+        os.makedirs(log_path, exist_ok=True)
         np.save(os.path.join(log_path, 'train_loss.npy'),np.array(logs_dict['train_loss']))
         np.save(os.path.join(log_path, 'train_ce_loss.npy'),np.array(logs_dict['train_ce_loss']))
         np.save(os.path.join(log_path, 'train_contrastive_loss.npy'),np.array(logs_dict['train_contrastive_loss']))

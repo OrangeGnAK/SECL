@@ -202,13 +202,15 @@ class FastSupCon(nn.Module):
             
             loss_flat = loss_flat * pixel_weights
             
+            masked_loss = loss_flat * valid_mask.float()
+            
             weight_mask = pixel_weights * valid_mask.float()
             sum_valid_weights = weight_mask.sum()
             
             if sum_valid_weights < 1e-5:
                 return z.sum() * 0.0
                 
-            return weight_mask.sum() / sum_valid_weights             
+            return masked_loss.sum() / sum_valid_weights                         
         else:
             loss_flat = loss_flat * valid_mask.float()
             num_valid_pixels = valid_mask.sum()
