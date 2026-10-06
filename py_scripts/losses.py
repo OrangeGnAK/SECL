@@ -183,19 +183,19 @@ class FastSupCon(nn.Module):
         # 5. similarity calculation [-1, 1]
         similarity = torch.bmm(phi_normalized, class_means_normalized.transpose(1, 2)) # [B, N, K]
         
-        # applying temperature
-        scaled_similarity = similarity / self.temperature
+        # # applying temperature
+        # scaled_similarity = similarity 
 
         # part with margin
-        S_pos = (scaled_similarity * one_hot_labels).sum(dim=-1) # [B, N]
+        S_pos = (similarity * one_hot_labels).sum(dim=-1) # [B, N]
         
         # getting similarity with the strongest wrong class
         inverse_labels = 1.0 - one_hot_labels
-        masked_norm = scaled_similarity * inverse_labels + (one_hot_labels * -10000.0)
+        masked_norm = similarity * inverse_labels + (one_hot_labels * -10000.0)
         S_neg_max, _ = torch.max(masked_norm, dim=-1) # [B, N]
         
         # hinge loss
-        loss_flat = F.relu(self.margin - (S_pos - S_neg_max))
+        loss_flat = F.relu(self.margin - (S_pos - S_neg_max)) / self.temperature
         
         if self.weight is not None:
             pixel_weights = (one_hot_labels * self.weight.view(1, 1, -1)).sum(dim=-1)
