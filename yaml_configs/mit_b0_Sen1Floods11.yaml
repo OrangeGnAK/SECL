@@ -5,8 +5,8 @@ model:
     proj_dim: 128
     num_classes: 2
     load_path: ""
-    best_path: "/kaggle/working/mit_b0_Sen1Floods11_best.pth"
-    last_path: "/kaggle/working/mit_b0_Sen1Floods11_last.pth"
+    best_path: "/kaggle/working/SECL/models/mit_b0_Sen1Floods11_best.pth"
+    last_path: "/kaggle/working/SECL/models/mit_b0_Sen1Floods11_last.pth"
 
 dataset:
     name: "Sen1Floods11" # ["Sen1Floods11", "Cityscapes"]
