@@ -44,7 +44,7 @@ def main():
     TOTAL_EPOCHS = config['hyperparams']['epochs']
     
     NUM_CLASSES = config['model']['num_classes']
-    print(f"/n/n/nnum classes is {NUM_CLASSES}/n/n/n")
+    model_save_dir = config['model']['model_save_dir']
     model_load_path = config['model']['load_path']
     model_best_path = config['model']['best_path']
     model_last_path = config['model']['last_path']
@@ -188,11 +188,13 @@ def main():
                 'loss': train_loss
             }
 
+            os.makedirs(model_save_dir, exist_ok=True)
             torch.save(checkpoint, model_last_path)
 
             # Saving the best model yet
             if val_miou > best_val_miou:
                 best_val_miou = val_miou
+                os.makedirs(model_save_dir, exist_ok=True)
                 torch.save(checkpoint, model_best_path)
                 print(f"--> [SAVED] Best chekpoint on the epoch {epoch} with Val mIoU: {val_miou:.4f}!")
             print("=========================\n")
