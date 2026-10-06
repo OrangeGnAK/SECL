@@ -83,7 +83,7 @@ def main():
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     optimizer, 
     T_max=TOTAL_EPOCHS, 
-    eta_min=1e-6  # Финальная микро-скорость на самом острие воронки
+    eta_min=1e-6  
 )
     scaler = torch.amp.GradScaler()
 
