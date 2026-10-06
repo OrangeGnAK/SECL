@@ -90,8 +90,7 @@ def main():
     ignore_index = config['criterion']['ignore_index']
     
     criterion_ce = torch.nn.CrossEntropyLoss(ignore_index=ignore_index).to(device)#, weight=weights).to(device)
-    criterion_fastsupcon = FastSupCon(
-        ignore_index=ignore_index, num_classes=NUM_CLASSES).to(device)#, weight=weights).to(device)
+    criterion_fastsupcon = FastSupCon(ignore_index=ignore_index, num_classes=NUM_CLASSES).to(device)#, weight=weights).to(device)
 
 # -----------------------------------------------------------------------------------
 #                         DATASET SPLIT

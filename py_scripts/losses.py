@@ -195,7 +195,8 @@ class FastSupCon(nn.Module):
         S_neg_max, _ = torch.max(masked_norm, dim=-1) # [B, N]
         
         # hinge loss
-        loss_flat = F.relu(self.margin - (S_pos - S_neg_max)) / self.temperature
+        # loss_flat = F.relu(self.margin - (S_pos - S_neg_max)) / self.temperature
+        loss_flat = F.softplus(self.margin - (S_pos - S_neg_max)) / self.temperature
         
         if self.weight is not None:
             pixel_weights = (one_hot_labels * self.weight.view(1, 1, -1)).sum(dim=-1)
