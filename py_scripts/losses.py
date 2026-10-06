@@ -71,7 +71,7 @@ class FastSupCon_softmax(nn.Module):
 
 
 # stable with margin
-class FastSupCon_margin(nn.Module):
+class FastSupCon(nn.Module):
     def __init__(self, temperature: float = 0.07, margin: float = 0.3, num_classes: int = 2, ignore_index=None):
         super().__init__()
         self.temperature = temperature
@@ -138,7 +138,7 @@ class FastSupCon_margin(nn.Module):
 
 
 
-class FastSupCon(nn.Module):
+class FastSupCon_weight(nn.Module):
     def __init__(self, temperature: float = 0.07, margin: float = 0.3, num_classes: int = 2, ignore_index=None, weight=None):
         super().__init__()
         self.temperature = temperature
@@ -197,7 +197,7 @@ class FastSupCon(nn.Module):
         # hinge loss
         # loss_flat = F.relu(self.margin - (S_pos - S_neg_max)) / self.temperature
         loss_flat = F.softplus(self.margin - (S_pos - S_neg_max)) / self.temperature
-        
+
         if self.weight is not None:
             pixel_weights = (one_hot_labels * self.weight.view(1, 1, -1)).sum(dim=-1)
             
