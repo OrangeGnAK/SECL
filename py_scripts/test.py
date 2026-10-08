@@ -105,7 +105,7 @@ def main():
 
     if is_main:
         print(f"\n=== RESULTS ===")
-        print(f"Test Loss: {train_loss:.4f} | Test mIoU: {train_miou:.4f}")
+        print(f"Test Loss: {test_loss:.4f} | Test mIoU: {test_miou:.4f}")
 
         # Writing to the log
         logs_dict['test_loss'].append(test_loss)
