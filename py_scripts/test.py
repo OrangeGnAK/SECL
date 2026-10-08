@@ -74,7 +74,7 @@ def main():
 
     _, _, test_ds = dataset_factory(config['dataset'], RANDOM_SEED)
 
-    test_dl, test_sampler = init_dataloaders(train_ds, RANDOM_SEED, BATCH_SIZE, local_rank, world_size)
+    test_dl, test_sampler = init_dataloaders(test_ds, RANDOM_SEED, BATCH_SIZE, local_rank, world_size)
 
 # -------------------------------------------------------------------------------------
 
