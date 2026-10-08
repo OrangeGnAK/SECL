@@ -40,6 +40,7 @@ def main():
     LAMBDA = config['hyperparams']['LAMBDA']
     NUM_CLASSES = config['model']['num_classes']
     model_load_path = config['model']['load_path']
+    log_path = config['log_path']
 
     local_rank, world_size, device = ddp_init()
     is_main = (local_rank == 0)
