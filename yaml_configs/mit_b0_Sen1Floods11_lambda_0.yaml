@@ -4,7 +4,7 @@ model:
     in_channels: 6
     proj_dim: 128
     num_classes: 2
-    load_path: ""
+    load_path: "/kaggle/working/SECL/models/mit_b0_Sen1Floods11_lambda_0_best.pth"
     model_save_dir: "/kaggle/working/SECL/models"
     best_path: "/kaggle/working/SECL/models/mit_b0_Sen1Floods11_lambda_0_best.pth"
     last_path: "/kaggle/working/SECL/models/mit_b0_Sen1Floods11_lambda_0_last.pth"
