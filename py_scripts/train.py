@@ -63,8 +63,7 @@ def main():
     
     model = model_factory(config['model']).to(device)
     
-    #TODO: Change model loading logic?
-    load_model(model, model_load_path, model_best_path, model_last_path, local_rank)
+    load_model(model, model_load_path, local_rank)
 
 
     model = torch.nn.parallel.DistributedDataParallel(

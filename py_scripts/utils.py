@@ -121,7 +121,7 @@ def ddp_init():
     return (local_rank, world_size, device)
 
 
-def load_model(model, model_load_path, model_best_path, model_last_path, local_rank):
+def load_model(model, model_load_path, local_rank):
     
     if os.path.exists(model_load_path):
         checkpoint = torch.load(model_load_path, map_location=f"cuda:{local_rank}")
