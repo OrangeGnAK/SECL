@@ -59,7 +59,7 @@ def model_factory(model_params):
         print(f"Model with the name {model_name} has not implemented.")
 
 
-def dataset_factory(dataset_params, RANDOM_SEED):
+def dataset_factory(dataset_params, RANDOM_SEED, train_mode=True):
      # ["Sen1Floods11", "Cityscapes"]
     
     dataset_name = dataset_params['name']
@@ -69,8 +69,9 @@ def dataset_factory(dataset_params, RANDOM_SEED):
         # SenFloods mean & std!!!
         mean = np.array([1195.1572, 1344.4296, 1379.89, 2578.4109, -10.4345, -17.308])
         std =  np.array([860.6037, 731.6119, 734.5892, 1029.2466, 4.1806, 4.8804])
-        
-        transform = Sen1Floods11_transform(mean, std)
+        transform = None
+        if train_mode:
+            transform = Sen1Floods11_transform(mean, std)
         dataset = Sen1Floods11_DS(
             '/kaggle/input/datasets/robertomarinoformica/sen1floods11-dataset/HandLabeled/S1Hand',
             '/kaggle/input/datasets/robertomarinoformica/sen1floods11-dataset/HandLabeled/S2Hand',
@@ -98,7 +99,10 @@ def dataset_factory(dataset_params, RANDOM_SEED):
         # TODO: change splitting logic for Cityscape. I can split it here via constructor
         # and then in utils.py divide spliting and init logic in two separate functions
         # so i can call split only for the SenFloods
-        transform = Cityscape_transform(mean, std)
+        transform = None
+        if train_mode:
+            transform = Cityscape_transform(mean, std)
+            
         train_ds = Cityscapes_DS(
             '/kaggle/input/datasets/electraawais/cityscape-dataset',
             mode='train',
