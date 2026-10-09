@@ -69,9 +69,7 @@ def dataset_factory(dataset_params, RANDOM_SEED, train_mode=True):
         # SenFloods mean & std!!!
         mean = np.array([1195.1572, 1344.4296, 1379.89, 2578.4109, -10.4345, -17.308])
         std =  np.array([860.6037, 731.6119, 734.5892, 1029.2466, 4.1806, 4.8804])
-        transform = None
-        if train_mode:
-            transform = Sen1Floods11_transform(mean, std)
+        transform = Sen1Floods11_transform(mean, std, train=train_mode)
         dataset = Sen1Floods11_DS(
             '/kaggle/input/datasets/robertomarinoformica/sen1floods11-dataset/HandLabeled/S1Hand',
             '/kaggle/input/datasets/robertomarinoformica/sen1floods11-dataset/HandLabeled/S2Hand',
@@ -96,12 +94,7 @@ def dataset_factory(dataset_params, RANDOM_SEED, train_mode=True):
         mean = np.array([73.1584, 82.9089, 72.3924])
         std =  np.array([47.6758, 48.4942, 47.7365])
 
-        # TODO: change splitting logic for Cityscape. I can split it here via constructor
-        # and then in utils.py divide spliting and init logic in two separate functions
-        # so i can call split only for the SenFloods
-        transform = None
-        if train_mode:
-            transform = Cityscape_transform(mean, std)
+        transform = Cityscape_transform(mean, std, train=train_mode)
             
         train_ds = Cityscapes_DS(
             '/kaggle/input/datasets/electraawais/cityscape-dataset',
