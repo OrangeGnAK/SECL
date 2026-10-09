@@ -5,6 +5,7 @@ model:
     proj_dim: 128
     num_classes: 2
     load_path: ""
+    model_save_dir: "/kaggle/working/SECL/models"
     best_path: "/kaggle/working/mit_b5_Sen1Floods11_best.pth"
     last_path: "/kaggle/working/mit_b5_Sen1Floods11_last.pth"
 
@@ -21,4 +22,7 @@ hyperparams:
     learning_rate : 0.00005 
     LAMBDA : 0.5 # [0.1, 0.5, 1, 2, 5]
     epochs : 60
+
+log_path: "/kaggle/working/SECL/logs/mit_b5_Sen1Floods11_log"
+
 
