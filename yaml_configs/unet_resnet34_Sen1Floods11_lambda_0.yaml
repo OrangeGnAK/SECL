@@ -4,9 +4,9 @@ model:
     in_channels: 6
     proj_dim: 128
     num_classes: 2
-    load_path: "/kaggle/working/unet_resnet34_Sen1Floods11_best.pth"
-    best_path: "/kaggle/working/unet_resnet34_Sen1Floods11_best.pth"
-    last_path: "/kaggle/working/unet_resnet34_Sen1Floods11_last.pth"
+    load_path: "/kaggle/working/unet_resnet34_Sen1Floods11_lambda_0_best.pth"
+    best_path: "/kaggle/working/unet_resnet34_Sen1Floods11_lambda_0_best.pth"
+    last_path: "/kaggle/working/unet_resnet34_Sen1Floods11_lambda_0_last.pth"
 
 dataset:
     name: "Sen1Floods11" # ["Sen1Floods11", "Cityscapes"]
@@ -19,7 +19,7 @@ hyperparams:
     seed : 42
     batch_size : 6
     learning_rate : 0.00005 
-    LAMBDA : 0.5 # [0.1, 0.5, 1, 2, 5]
+    LAMBDA : 0 # [0.1, 0.5, 1, 2, 5]
     epochs : 60
 
-log_path: "/kaggle/working/SECL/logs/unet_resnet34_Sen1Floods11_log"
+log_path: "/kaggle/working/SECL/logs/unet_resnet34_Sen1Floods11_lambda_0_log"
