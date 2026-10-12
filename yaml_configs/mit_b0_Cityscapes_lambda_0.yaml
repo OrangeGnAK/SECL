@@ -1,17 +1,17 @@
 
 model:
     name: "mit_b0" # ["mit_b0", "mit_b5", "unet_resnet34", "unet_efficientnet_b7"]
-    in_channels: 6
+    in_channels: 3
     proj_dim: 128
-    num_classes: 2
+    num_classes: 19
     load_path: ""
-    best_path: "/kaggle/working/mit_b0_Cityscapes_best.pth"
+    best_path: "/kaggle/working/mit_b0_Cityscapes_lambda_0_best.pth"
     model_save_dir: "/kaggle/working/SECL/models"
-    last_path: "/kaggle/working/mit_b0_Cityscapes_last.pth"
+    last_path: "/kaggle/working/mit_b0_Cityscapes_lambda_0_last.pth"
 
 dataset:
     name: "Cityscapes" # ["Sen1Floods11", "Cityscapes"]
-    num_classes: 2
+    num_classes: 19
 
 criterion:
     ignore_index: -1
@@ -20,8 +20,8 @@ hyperparams:
     seed : 42
     batch_size : 4
     learning_rate : 0.00005 
-    LAMBDA : 0.5 # [0.1, 0.5, 1, 2, 5]
+    LAMBDA : 0 # [0.1, 0.5, 1, 2, 5]
     epochs : 60
 
-log_path: "/kaggle/working/SECL/logs/mit_b0_Cityscapes_log"
+log_path: "/kaggle/working/SECL/logs/mit_b0_Cityscapes_lambda_0_log"
 

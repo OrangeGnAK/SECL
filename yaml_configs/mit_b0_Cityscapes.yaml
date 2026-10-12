@@ -1,9 +1,9 @@
 
 model:
     name: "mit_b0" # ["mit_b0", "mit_b5", "unet_resnet34", "unet_efficientnet_b7"]
-    in_channels: 6
+    in_channels: 3
     proj_dim: 128
-    num_classes: 2
+    num_classes: 19
     load_path: ""
     best_path: "/kaggle/working/mit_b0_Cityscapes_best.pth"
     model_save_dir: "/kaggle/working/SECL/models"
@@ -11,7 +11,7 @@ model:
 
 dataset:
     name: "Cityscapes" # ["Sen1Floods11", "Cityscapes"]
-    num_classes: 2
+    num_classes: 19
 
 criterion:
     ignore_index: -1
