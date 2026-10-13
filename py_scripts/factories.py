@@ -44,14 +44,14 @@ def model_factory(model_params):
         return model
 
     elif model_name == 'unet_resnet34':
-        model = contrastive_Unet_EfficientNet(
+        model = contrastive_Unet(
             in_channels=in_channels, projection_dim=proj_dim, num_classes=num_classes
         )
         return model
     
     elif model_name == 'unet_efficientnet_b7':
-        model = contrastive_Unet_(
-            in_channels=in_channels, projection_dim=proj_dim, num_classes=num_classes
+        model = contrastive_Unet_EfficientNet(
+            in_channels=in_channels, proj_dim=proj_dim, num_classes=num_classes
         )
         return model
         
