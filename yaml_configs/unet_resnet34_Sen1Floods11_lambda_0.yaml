@@ -5,6 +5,7 @@ model:
     proj_dim: 128
     num_classes: 2
     load_path: "/kaggle/working/unet_resnet34_Sen1Floods11_lambda_0_best.pth"
+    model_save_dir: "/kaggle/working/SECL/models"
     best_path: "/kaggle/working/unet_resnet34_Sen1Floods11_lambda_0_best.pth"
     last_path: "/kaggle/working/unet_resnet34_Sen1Floods11_lambda_0_last.pth"
 

@@ -5,6 +5,7 @@ model:
     proj_dim: 128
     num_classes: 2
     load_path: "/kaggle/working/unet_resnet34_Sen1Floods11_best.pth"
+    model_save_dir: "/kaggle/working/SECL/models"
     best_path: "/kaggle/working/unet_resnet34_Sen1Floods11_best.pth"
     last_path: "/kaggle/working/unet_resnet34_Sen1Floods11_last.pth"
 
@@ -19,7 +20,7 @@ hyperparams:
     seed : 42
     batch_size : 6
     learning_rate : 0.00005 
-    LAMBDA : 0.5 # [0.1, 0.5, 1, 2, 5]
+    LAMBDA : 2 # [0.1, 0.5, 1, 2, 5]
     epochs : 60
 
 log_path: "/kaggle/working/SECL/logs/unet_resnet34_Sen1Floods11_log"
