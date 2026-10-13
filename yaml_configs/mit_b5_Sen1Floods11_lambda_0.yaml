@@ -23,6 +23,6 @@ hyperparams:
     LAMBDA : 0 # [0.1, 0.5, 1, 2, 5]
     epochs : 60
 
-log_path: "/kaggle/working/SECL/logs/mit_b5_Sen1Floods11_log"
+log_path: "/kaggle/working/SECL/logs/mit_b5_Sen1Floods11_lambda_0_log"
 
 
