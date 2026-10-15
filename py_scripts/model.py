@@ -168,8 +168,6 @@ class contrastive_Unet(torch.nn.Module):
         features = self.encoder(x)
         features = self.decoder(features)
 
-        print(features.shape)
-
         z_spatial = self.projection_head(features)
         z_flat = z_spatial.flatten(2).transpose(1, 2)
 
@@ -201,7 +199,6 @@ class contrastive_Unet_EfficientNet(torch.nn.Module):
         features = self.encoder(x)
         features = self.decoder(features)
 
-        print(features.shape)
         z_spatial = self.projection_head(features)
         z_flat = z_spatial.flatten(2).transpose(1, 2)
 
