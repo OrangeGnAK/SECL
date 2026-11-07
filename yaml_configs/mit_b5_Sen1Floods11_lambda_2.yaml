@@ -4,10 +4,10 @@ model:
     in_channels: 6
     proj_dim: 128
     num_classes: 2
-    load_path: "/kaggle/working/mit_b5_Sen1Floods11_lambda_0_best.pth"
+    load_path: "/kaggle/working/mit_b5_Sen1Floods11_lambda_2_best.pth"
     model_save_dir: "/kaggle/working/SECL/models"
-    best_path: "/kaggle/working/mit_b5_Sen1Floods11_lambda_0_best.pth"
-    last_path: "/kaggle/working/mit_b5_Sen1Floods11_lambda_0_last.pth"
+    best_path: "/kaggle/working/mit_b5_Sen1Floods11_lambda_2_best.pth"
+    last_path: "/kaggle/working/mit_b5_Sen1Floods11_lambda_2_last.pth"
 
 dataset:
     name: "Sen1Floods11" # ["Sen1Floods11", "Cityscapes"]
@@ -20,9 +20,9 @@ hyperparams:
     seed : 42
     batch_size : 4
     learning_rate : 0.00005 
-    LAMBDA : 0 # [0.1, 0.5, 1, 2, 5]
+    LAMBDA : 2 # [0.1, 0.5, 1, 2, 5]
     epochs : 60
 
-log_path: "/kaggle/working/SECL/logs/mit_b5_Sen1Floods11_lambda_0_log"
+log_path: "/kaggle/working/SECL/logs/mit_b5_Sen1Floods11_lambda_2_log"
 
 
