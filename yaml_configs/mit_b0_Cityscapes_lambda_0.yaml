@@ -4,7 +4,8 @@ model:
     in_channels: 3
     proj_dim: 128
     num_classes: 19
-    load_path: ""
+    weights: "imagenet"
+    load_path: "/kaggle/working/mit_b0_Cityscapes_lambda_0_best.pth"
     best_path: "/kaggle/working/mit_b0_Cityscapes_lambda_0_best.pth"
     model_save_dir: "/kaggle/working/SECL/models"
     last_path: "/kaggle/working/mit_b0_Cityscapes_lambda_0_last.pth"

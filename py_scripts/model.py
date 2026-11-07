@@ -3,7 +3,7 @@ import torch.nn.functional as F
 import segmentation_models_pytorch as smp
 
 class contrastive_mit_b0(torch.nn.Module):
-    def __init__(self, in_channels: int = 6, projection_dim: int = 128, num_classes: int = 2):
+    def __init__(self, in_channels: int = 6, projection_dim: int = 128, num_classes: int = 2, weights=None):
         super().__init__()
         
         # 1. MixTransformer-B0
@@ -11,7 +11,7 @@ class contrastive_mit_b0(torch.nn.Module):
             name="mit_b0",
             in_channels=in_channels,
             depth=5,
-            weights=None
+            weights=weights
         )
         
         # 2. projection per each piramyd layer (SegFormer-style)
@@ -75,7 +75,7 @@ class contrastive_mit_b0(torch.nn.Module):
 
 
 class contrastive_mit_b5(torch.nn.Module):
-    def __init__(self, in_channels: int = 6, projection_dim: int = 128, num_classes: int = 2):
+    def __init__(self, in_channels: int = 6, projection_dim: int = 128, num_classes: int = 2, weights=None):
         super().__init__()
         
         # 1. MixTransformer-B0
@@ -83,7 +83,7 @@ class contrastive_mit_b5(torch.nn.Module):
             name="mit_b5",
             in_channels=in_channels,
             depth=5,
-            weights=None
+            weights=weights
         )
         
         # 2. projection per each piramyd layer (SegFormer-style)
@@ -147,13 +147,13 @@ class contrastive_mit_b5(torch.nn.Module):
 
 
 class contrastive_Unet(torch.nn.Module):
-    def __init__(self, in_channels=6, projection_dim=128, num_classes=2):
+    def __init__(self, in_channels=6, projection_dim=128, num_classes=2, weights=None):
 
         super().__init__()
         
         full_unet = smp.Unet(
             encoder_name="resnet34",
-            encoder_weights=None,
+            encoder_weights=weights,
             in_channels=in_channels, classes=num_classes)
 
         self.encoder = full_unet.encoder
@@ -178,13 +178,13 @@ class contrastive_Unet(torch.nn.Module):
 
 
 class contrastive_Unet_EfficientNet(torch.nn.Module):
-    def __init__(self, in_channels=6, num_classes=2, proj_dim=128):
+    def __init__(self, in_channels=6, num_classes=2, proj_dim=128, weights=None):
 
         super().__init__()
         
         full_unet = smp.Unet(
             encoder_name="efficientnet-b7",
-            encoder_weights=None,
+            encoder_weights=weights,
             in_channels=in_channels, classes=num_classes)
 
         self.encoder = full_unet.encoder
