@@ -4,6 +4,7 @@ model:
     in_channels: 6
     proj_dim: 128
     num_classes: 2
+    model_save_dir: "/kaggle/working/SECL/models"
     load_path: "/kaggle/working/unet_efficientnet_b7_Sen1Floods11_lambda_0_best.pth"
     best_path: "/kaggle/working/unet_efficientnet_b7_Sen1Floods11_lambda_0_best.pth"
     last_path: "/kaggle/working/unet_efficientnet_b7_Sen1Floods11_lambda_0_last.pth"
@@ -18,7 +19,7 @@ criterion:
 hyperparams:
     seed : 42
     batch_size : 4
-    learning_rate : 0.00005 
+    learning_rate : 0.0001
     LAMBDA : 0 # [0.1, 0.5, 1, 2, 5]
     epochs : 60
 

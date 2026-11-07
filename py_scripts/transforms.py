@@ -31,8 +31,7 @@ class Cityscape_transform:
     def __init__(self, mean, std, train=True):
         if train:
             self.transform = A.Compose([
-                A.Resize(height=512, width=1024),
-                A.RandomCrop(height=512,width=512),
+                A.RandomCrop(height=1024,width=1024),
                 A.HorizontalFlip(p=0.5),
                 A.RandomBrightnessContrast(p=0.2),
                 A.HueSaturationValue(p=0.2),
