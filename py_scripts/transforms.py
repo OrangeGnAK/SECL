@@ -31,7 +31,7 @@ class Cityscape_transform:
     def __init__(self, mean, std, train=True):
         if train:
             self.transform = A.Compose([
-                A.RandomCrop(height=768,width=768),
+                A.RandomCrop(height=1024,width=1024),
                 A.HorizontalFlip(p=0.5),
                 A.RandomBrightnessContrast(p=0.2),
                 A.HueSaturationValue(p=0.2),
@@ -40,7 +40,7 @@ class Cityscape_transform:
             ])
         else:
             self.transform = A.Compose([
-                A.CenterCrop(height=768,width=768),
+                A.CenterCrop(height=1024,width=1024),
                 A.Normalize(mean=mean, std=std, max_pixel_value=1.0),
                 A.ToTensorV2()
             ])
