@@ -95,22 +95,23 @@ def dataset_factory(dataset_params, RANDOM_SEED, train_mode=True):
         mean = np.array([73.1584, 82.9089, 72.3924])
         std =  np.array([47.6758, 48.4942, 47.7365])
 
-        transform = Cityscape_transform(mean, std, train=train_mode)
+        train_transform = Cityscape_transform(mean, std, train=True)
+        valtest_transform = Cityscape_transform(mean, std, train=False)
             
         train_ds = Cityscapes_DS(
             '/kaggle/input/datasets/electraawais/cityscape-dataset',
             mode='train',
-            transform=transform)
+            transform=train_transform)
 
         val_ds = Cityscapes_DS(
             '/kaggle/input/datasets/electraawais/cityscape-dataset',
-            mode='train',
-            transform=transform)
+            mode='val',
+            transform=valtest_transform)
 
         test_ds = Cityscapes_DS(
             '/kaggle/input/datasets/electraawais/cityscape-dataset',
-            mode='train',
-            transform=transform)
+            mode='test',
+            transform=valtest_transform)
 
         return train_ds, val_ds, test_ds
     else:
