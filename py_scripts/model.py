@@ -1,18 +1,28 @@
 import torch
 import torch.nn.functional as F
 import segmentation_models_pytorch as smp
+from transformers import SegformerModel
+
 
 class contrastive_mit_b0(torch.nn.Module):
     def __init__(self, in_channels: int = 6, projection_dim: int = 128, num_classes: int = 2, weights=None):
         super().__init__()
         
         # 1. MixTransformer-B0
-        self.encoder = smp.encoders.get_encoder(
-            name="mit_b0",
-            in_channels=in_channels,
-            depth=5,
-            weights=weights
-        )
+        if weights == "Cityscapes":
+          self.encoder = SegformerModel.from_pretrained("nvidia/segformer-b0-finetuned-cityscapes-1024-1024")
+          for param in self.encoder.parameters():
+            param.requires_grad = False
+          self.encoder.eval()
+        else:
+          self.encoder = smp.encoders.get_encoder(
+              name="mit_b0",
+              in_channels=in_channels,
+              depth=5,
+              weights=weights
+          )
+
+        self.weights = weights
         
         # 2. projection per each piramyd layer (SegFormer-style)
         self.proj_layers = torch.nn.ModuleDict({
@@ -35,13 +45,25 @@ class contrastive_mit_b0(torch.nn.Module):
         # 5. seg head
         self.segmentation_head = torch.nn.Conv2d(256, num_classes, kernel_size=1)
 
+
+    def train(self, mode: bool = True):
+        super().train(mode)
+        if self.weights == "Cityscapes":
+          self.encoder.eval()
+        return self
+
     def forward(self, x: torch.Tensor):
-        
         
         B, _, H, W = x.size()
         
         # extracting features
-        features = self.encoder(x)
+        if self.weights == "Cityscapes":
+          with torch.no_grad():
+            features = self.encoder(
+              x, output_hidden_states=True).hidden_states
+        else:
+          features = self.encoder(x)
+
         fused_features = []
         
         for f in features:
@@ -62,14 +84,12 @@ class contrastive_mit_b0(torch.nn.Module):
         # features after fuse block [B, 256, H, W]
         x_features = self.fuse_block(x_fused)
         
-        
         # contrastive learning
         z_spatial = self.contrast_head(x_features) # [B, projection_dim, H, W]
         z_flat = z_spatial.flatten(2).transpose(1, 2) # [B, H*W, projection_dim]
         
         # seg head
         logits = self.segmentation_head(x_features) # [B, num_classes, H, W]
-        
         
         return (z_flat, logits)
 
@@ -78,14 +98,22 @@ class contrastive_mit_b5(torch.nn.Module):
     def __init__(self, in_channels: int = 6, projection_dim: int = 128, num_classes: int = 2, weights=None):
         super().__init__()
         
-        # 1. MixTransformer-B0
-        self.encoder = smp.encoders.get_encoder(
+        # 1. MixTransformer-B5
+        if weights == "Cityscapes":
+          self.encoder = SegformerModel.from_pretrained("nvidia/segformer-b5-finetuned-cityscapes-1024-1024")
+          for param in self.encoder.parameters():
+            param.requires_grad = False
+          self.encoder.eval()
+        else:
+          self.encoder = smp.encoders.get_encoder(
             name="mit_b5",
             in_channels=in_channels,
             depth=5,
             weights=weights
-        )
+          )
         
+        self.weights = weights
+
         # 2. projection per each piramyd layer (SegFormer-style)
         self.proj_layers = torch.nn.ModuleDict({
             '64':  torch.nn.Conv2d(64, 128, kernel_size=1),
@@ -107,13 +135,23 @@ class contrastive_mit_b5(torch.nn.Module):
         # 5. seg head
         self.segmentation_head = torch.nn.Conv2d(256, num_classes, kernel_size=1)
 
+    def train(self, mode: bool = True):
+      super().train(mode)
+      if self.weights == "Cityscapes":
+        self.encoder.eval()
+      return self
+
     def forward(self, x: torch.Tensor):
-        
-        
+
         B, _, H, W = x.size()
         
         # extracting features
-        features = self.encoder(x)
+        if self.weights == "Cityscapes":
+          with torch.no_grad():
+            features = self.encoder(
+              x, output_hidden_states=True).hidden_states
+        else:
+          features = self.encoder(x)
         fused_features = []
         
         for f in features:
@@ -145,6 +183,7 @@ class contrastive_mit_b5(torch.nn.Module):
         
         return (z_flat, logits)
 
+        
 
 class contrastive_Unet(torch.nn.Module):
     def __init__(self, in_channels=6, projection_dim=128, num_classes=2, weights=None):
