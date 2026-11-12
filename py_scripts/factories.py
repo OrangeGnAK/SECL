@@ -92,8 +92,14 @@ def dataset_factory(dataset_params, RANDOM_SEED, train_mode=True):
     
     elif dataset_name == 'Cityscapes':
 
-        mean = np.array([73.1584, 82.9089, 72.3924])
-        std =  np.array([47.6758, 48.4942, 47.7365])
+        # image_net_mean = 0.485, 0.456, 0.406
+        # image_net_std  = 0.229, 0.224, 0.225
+        
+        # cityscapes_mean = np.array([73.1584, 82.9089, 72.3924])
+        # cityscapes_std =  np.array([47.6758, 48.4942, 47.7365])
+
+        mean = np.array([0.485, 0.456, 0.406])
+        std = np.array([0.229, 0.224, 0.225])
 
         train_transform = Cityscape_transform(mean, std, train=True)
         valtest_transform = Cityscape_transform(mean, std, train=False)
