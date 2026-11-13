@@ -78,7 +78,8 @@ def main():
 
     weights = weights_factory(config['dataset']['name'], device)
     
-    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
+    optimizer = torch.optim.AdamW(
+        filter(lambda p: p.requires_grad, model.parameters()), lr=LEARNING_RATE)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     optimizer, 
     T_max=TOTAL_EPOCHS, 

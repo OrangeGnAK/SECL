@@ -4,7 +4,7 @@ model:
     in_channels: 3
     proj_dim: 128
     num_classes: 19
-    weights: "imagenet"
+    weights: "Cityscapes"
     load_path: "/kaggle/working/mit_b0_Cityscapes_lambda_0_best.pth"
     best_path: "/kaggle/working/mit_b0_Cityscapes_lambda_0_best.pth"
     model_save_dir: "/kaggle/working/SECL/models"
@@ -20,9 +20,9 @@ criterion:
 hyperparams:
     seed : 42
     batch_size : 3
-    learning_rate : 0.00005 
+    learning_rate : 0.0005 
     LAMBDA : 0 # [0.1, 0.5, 1, 2, 5]
-    epochs : 60
+    epochs : 30
 
 log_path: "/kaggle/working/SECL/logs/mit_b0_Cityscapes_lambda_0_log"
 
