@@ -39,6 +39,7 @@ def main():
     RANDOM_SEED = config['hyperparams']['seed']
     BATCH_SIZE = config['hyperparams']['batch_size']
     LEARNING_RATE = config['hyperparams']['learning_rate']
+    MIN_LEARNING_RATE = config['hyperparams']['min_learning_rate']
     LAMBDA = config['hyperparams']['LAMBDA']
     START_EPOCH = 1
     TOTAL_EPOCHS = config['hyperparams']['epochs']
@@ -83,7 +84,7 @@ def main():
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     optimizer, 
     T_max=TOTAL_EPOCHS, 
-    eta_min=1e-6  
+    eta_min=MIN_LEARNING_RATE  
 )
     scaler = torch.amp.GradScaler()
 
